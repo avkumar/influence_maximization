@@ -77,7 +77,7 @@ def Shapley_calculation(player_list,characteristic_function):
     for e in Marginal_Contribution_dict:
         Marginal_Contribution_dict[e]/=k
     return Marginal_Contribution_dict
-#class game
+
 class Coop_Game():
     def __init__(self,player_list,characteristic_function):
         self.player_list=player_list
