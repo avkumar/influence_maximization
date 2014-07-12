@@ -53,7 +53,7 @@ void game1MCstepAdapter(int n, vector< pair<short,double> > *adj, short * shuffl
 }
 '''
 
-def game1MCstep(numNodes, adj, shuffling, shapMC):
+def game1MCShapstep(numNodes, adj, shuffling, shapMC):
     Counted =  [False]*numNodes
     for i in range(numNodes):
         vert = shuffling[i]
@@ -64,16 +64,40 @@ def game1MCstep(numNodes, adj, shuffling, shapMC):
         if not Counted[vert]:
             shapMC[vert] += 1
             Counted[vert] = True
-    print shapMC        
+#    print shapMC        
     return shapMC
 
 
 
+def game1MCBanzstep(numNodes, adj, coalition,  banzMC):
+    Counted = [False]*numNodes
+    for vert in range(numNodes):
+        for otherVert in coalition:
+            if otherVert != vert:
+                for u in adj[otherVert]:
+                    Counted[u] = True
+                Counted[otherVert] = True
+        for u in adj[vert]:
+            if not Counted[u]:
+                banzMC[vert] += 1
+                Counted[u] = True
+        if not Counted[vert]:
+            banzMC[vert] += 1
+            Counted[vert] = True
+#    print shapMC        
+    return banzMC
 
-def game1MCstepAdapter(numNodes, adj, copyOfNodes, numThreshholdEdges, Wcutoff, influence_dist, payOff_function, distances, shapMC):
-    shapMC = game1MCstep(numNodes, adj, copyOfNodes, shapMC)
+
+
+def game1MCShapstepAdapter(numNodes, adj, copyOfNodes, numThreshholdEdges, Wcutoff, influence_dist, payOff_function, distances, indexMC):
+    shapMC = game1MCShapstep(numNodes, adj, copyOfNodes, indexMC)
     return shapMC
 
+
+
+def game1MCBanzstepAdapter(numNodes, adj, copyOfNodes, numThreshholdEdges, Wcutoff, influence_dist, payOff_function, distances, indexMC):
+    banzMC = game1MCBanzstep(numNodes, adj, copyOfNodes, indexMC)
+    return banzMC
 
 '''
 void game2MCstep(int n, vector< pair<short,double> >* adj, short* shuffling , int *k){
@@ -267,7 +291,7 @@ def computeShapMC(numNodes, adj, maxIteration,  numThreshholdEdges, Wcutoff, inf
         copyOfNodes = range(numNodes)
         random.shuffle(copyOfNodes)
 
-        shapMC =  game1MCstepAdapter(numNodes, adj, copyOfNodes, numThreshholdEdges, Wcutoff, influence_dist, payOff_function, distances, shapMC)
+        shapMC =  game1MCShapstepAdapter(numNodes, adj, copyOfNodes, numThreshholdEdges, Wcutoff, influence_dist, payOff_function, distances, shapMC)
     	myIter = myIter + 1
 
     print shapMC
@@ -275,13 +299,40 @@ def computeShapMC(numNodes, adj, maxIteration,  numThreshholdEdges, Wcutoff, inf
         shapMC[i] = shapMC[i] / float(maxIteration)
     print shapMC     
     return shapMC 
+
+
+
+def computeBanzMC(numNodes, adj, maxIteration,  numThreshholdEdges, Wcutoff, influence_dist,  payOff_function, distances):
+
+
+#        game1MCstepAdapter(numNodes, adj, copyOfNodes, numThreshholdEdges, Wcutoff, influence_dist, payOff_function, distances):
+    banzMC = [0]* numNodes    
+    myIter = 1
+    while myIter <= maxIteration:
+        copyOfNodes = range(numNodes)
+        coalition = []
+        for j in copyOfNodes:
+            if (random.randint(0,1)):
+                 coalition.append(j)
+        banzMC =  game1MCBanzstepAdapter(numNodes, adj, coalition, numThreshholdEdges, Wcutoff, influence_dist, payOff_function, distances, banzMC)
+        myIter = myIter + 1
+
+    print banzMC
+    for i in range(numNodes):    
+        banzMC[i] = banzMC[i] / float(maxIteration)
+    print banzMC     
+    return banzMC 
+
+
+
+
 '''
 /**
  *
  * n     - the size of the graph
  * adj   - the adjencent matrix of the graph
  * maxIteretion - the maximum number of MC iteration
- * shapExact - the exact SV to compute error
+ * banzExact - the exact SV to compute error
  * k - parameter for Game 2
  * D - the sequence of vertices limited by d_cutoff parameter from Game 3
  * f - function from Game 4
@@ -290,8 +341,12 @@ def computeShapMC(numNodes, adj, maxIteration,  numThreshholdEdges, Wcutoff, inf
  */
 '''
 
-def computeMCGame1(numNodes, adj, maxIteration ):
-    return(computeShapMC(numNodes, adj, maxIteration,  0, 0, 0, 0, 0))
+def computeMCGame1(numNodes, adj, maxIteration, powerIndex ):
+    if (powerIndex == 'shap'):
+        return(computeShapMC(numNodes, adj, maxIteration,  0, 0, 0, 0, 0))
+    if (powerIndex == 'banz'):
+        return (computeBanzMC(numNodes, adj, maxIteration, 0, 0, 0 , 0, 0))
+
         
 
 '''

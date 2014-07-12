@@ -119,12 +119,18 @@ int main(void)
 '''
 if __name__ =="__main__":
     maxIteration = 0
-    maxIteration = 12
+    maxIteration = 12000
     G1 = 'power.txt'
     G2 = 'astro-ph.txt'
     numNodes, numEdges,  adj =  readGraph(G1, True)
 #    print numNodes, numEdges, adj
     shapExact1 = computeExactGame1(numNodes, adj)
-    shapComputeMCGame1 = computeMCGame1(numNodes, adj, maxIteration)
+    shapComputeMCGame1 = computeMCGame1(numNodes, adj, maxIteration, 'shap')
+    banzComputeMCGame1 =   computeMCGame1(numNodes, adj, maxIteration, 'banz')
+
+    
+    
     print shapExact1
     print shapComputeMCGame1
+    print "banzComputeMCGAme1"
+    print banzComputeMCGame1
