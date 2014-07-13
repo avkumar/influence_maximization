@@ -1,5 +1,7 @@
 import math
-
+import itertools 
+from itertools import permutations
+from itertools import chain, combinations
 '''
 void computeExactGame1(int n, vector< pair<short,double> >* adj) {
 	short u = 0;
@@ -9,26 +11,41 @@ void computeExactGame1(int n, vector< pair<short,double> >* adj) {
 		 for (unsigned short j=0; j<adj[i].size(); j++) {
 			 u = adj[i][j].first;
              shapExact[i] += (1.0 / pow( 2.0, int(adj[u].size())) );
-		 }
+		 w
 	}
 }
 '''
 
 print "in exactMethods.py"
-def computeExactGame1(numNodes, adj):
-    shapExact = []
+def computeBanzExactGame1(numNodes, adj):
+    banzExact = []
     print "in computeExactgame1"
     print numNodes, adj[0], adj[1]
     for i in range(0, numNodes):
-        shapExact.append(1.0 / pow(2.0,  len(adj[i]) ) )
+        banzExact.append(1.0 / pow(2.0,  len(adj[i]) ) )
         if i == 1:
-            print shapExact[1]
+            print banzExact[1]
         for u in adj[i]:
-            shapExact[i] += ( 1.0 / pow( 2.0, len( adj[u] ))  )
+            banzExact[i] += ( 1.0 / pow( 2.0, len( adj[u] ))  )
             if i == 1:
                 print (1.0 / pow(2, len(adj[u]))) 
+    print len(banzExact)    
+    return banzExact
+
+print "in exactMethods.py"
+def computeShapExactGame1(numNodes, adj):
+    shapExact = [0]*numNodes
+    print "in computeExactgame1"
+    print numNodes, adj[0], adj[1]
+    for i in range(0, numNodes):
+        if adj.__contains__(i):
+            shapExact[i] += (1.0 / ( 1 +  len(adj[i]))  )
+            for u in adj[i]:
+                if adj[i].__contains__(u):
+                    shapExact[i] += ( 1.0 / (1 +  len( adj[u] ))  )
     print len(shapExact)    
     return shapExact
+
 
 
 
@@ -48,7 +65,20 @@ void computeExactGame2(int n, vector< pair<short,double> >* adj, int *k){
 		 }
 	 }
 }
+'''
+def computeShapExactGame2(numNodes, adj, numThreshold):
+    shapExact = [0]*numNodes
+    for i in range(numNodes):
+        shapExact[i] = min(1.0,  (( float) (numThreshold[i])) /(1.0+ (float) (len(adj[i]))) )
+        for u in adj[i]:
+            degree = float (len(adj[u]))
+            shapExact[i] = max(0.0, ( degree - (float) (numThreshold[u]) + 1.0)/	( degree*(1.0+degree))  )
+    return shapExact
+    					 
 
+
+
+'''
 void computeExactGame3(int n, vector< pair<short,double> >* adj, vector<short> *D){
 
 	for (unsigned short i=0; i<n; i++) {
@@ -58,6 +88,17 @@ void computeExactGame3(int n, vector< pair<short,double> >* adj, vector<short> *
 		 }
 	}
 }
+
+'''
+def computeShapExactGame3(numNodes, adj, D):
+    for i in range(numNodes):
+        for u in D[i]:
+            extDegree = len(D[u]) - 1
+            shapExact +=  (1.0 / (1.0 + extDegree)) 
+
+
+'''
+
 
 void computeExactGame4(int n, vector< pair<short,double> >* adj, double (*f)(double), vector<double> *distances, vector<short> *D) {
 
@@ -198,4 +239,80 @@ void computeBruteForceGame5(int n, vector< pair<short,double> >* adj, double *Wc
 }
 
 '''
+#12 node graph 
+
+
+def computeFactorial(n):
+    factorial = 1
+    for i in range(1, n+1):
+        factorial = factorial * i
+    return factorial   
+
+
+factorials_12 = [0,1,2,6,24,120,720,5040,40320,362880,3628800,39916800,479001600]
+
+def computeShapBruteForceGame5(numNodes, adj, Wcutoff):
+    factorial =  computeFactorial(numNodes)
+    nodes = [i for i in range(numNodes)]
+    shapExact = [0]*numNodes
+
+    for permutation in itertools.permutations(nodes):
+        Counted = [False] * numNodes
+        Weights = [0] * numNodes
+        for i in range(numNodes):
+            vert = permutation[i]
+            for u in adj[vert]:
+                weight = adj[vert][u]
+                if not Counted[u]:
+                    Weights[u] += weight
+                    if Weights >= Wcutoff[u] :
+                        Counted[u]= True
+                        shapExact[vert] += 1
+
+            if not Counted[vert]:
+                shapExact[vert] += 1
+                Counted[vert] = True
+
+    shapExact = [(shapExact[i] / float(factorial )) for i in range(numNodes)]
+    
+    return shapExact
+
+
+def computeBanzBruteForceGame5(numNodes, adj, Wcutoff):
+    Nodes = [i for i in range(numNodes)]
+    numCoalitions = 0
+    BanzExact = [0]*numNodes
+    for coalition in chain.from_iterable(combinations(Nodes, r) for r in range(len(Nodes)+1)): 
+        Counted = [False]*numNodes
+        Weights = [0]*numNodes
+        for vert in coalition:
+            Counted[vert] = True
+            for u in adj[vert]:
+                Weights[u] += adj[u][vert]
+                if Weights[u] >= Wcutoff[u]:
+                    Counted[u] = True
+                    
+
+        for vert in range(numNodes):
+            if vert not in coalition:
+                if not Counted[vert]:
+                    BanzExact[vert] += 1
+                if adj.__contains__( vert ): 
+                    for u in adj[vert]:
+                        if not Counted[u] and Weights[u] + adj[vert][u] >= Wcutoff[u]:
+                            BanzExact[vert] += 1
+        numCoalitions += 1
+                       
+    for i in range(numNodes):
+        BanzExact[i] = BanzExact[i] * 2/ float(numCoalitions)                     
+    return  BanzExact
+                     
+
+
+
+
+
+
+
+
 
