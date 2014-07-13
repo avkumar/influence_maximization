@@ -210,40 +210,25 @@ def game4MCBanzstepAdapter(numNodes, adj, copyOfNodes, numThresholdEdges, Wcutof
 
 
 def game5MCBanzstep (numNodes,  adj, coalition , Wcutoff,  banzMC):
-   
-    def findBanzMC(vert, coalition):
-        Weights = [0] * numNodes
-        banzMC_vert_val = 0
-        if adj.__contains__(vert):
-            for u in adj[vert]:
-                if coalition:      
-                    Weights[u] = findWeights(u, coalition)     
-                    if (Weights[u] < Wcutoff[u]) :
-                        weight = adj[vert][u]
-                        Weights[u] += weight
-                        if(Weights[u] >= Wcutoff[u]):
-                            banzMC_vert_val += 1
-            
-        if(findWeights(vert, coalition) < Wcutoff[vert]) :     
-                banzMC_vert_val +=  1
-        return banzMC_vert_val
-           
-    def findWeights(u, coalition):
-        sumWeight = 0
-        if coalition:
-            for node in coalition:
-               if adj.__contains__(node): 
-                   if adj[node].__contains__(u):
-                       sumWeight += adj[node][u]               
-        return sumWeight
-          
-       
+    Nodes = [i for i in range(numNodes)] 
+    Counted = [False]*numNodes
+    Weights = [0]*numNodes
+    for vert in coalition:
+        Counted[vert] = True
+        for u in adj[vert]:
+            Weights[u] += adj[u][vert]
+            if Weights[u] >= Wcutoff[u]:
+                Counted[u] = True
+                
+
     for vert in range(numNodes):
-        if vert in coalition:
-            subcoalition = list(coalition)
-            banzMC[vert] += findBanzMC(vert, subcoalition.remove(vert))
-        else:
-            banzMC[vert] += findBanzMC(vert, coalition)
+        if vert not in coalition:
+            if not Counted[vert]:
+                banzMC[vert] += 1
+            if adj.__contains__( vert ): 
+                for u in adj[vert]:
+                    if not Counted[u] and Weights[u] + adj[vert][u] >= Wcutoff[u]:
+                       banzMC[vert] += 1
 
     return banzMC
 
@@ -310,12 +295,12 @@ def computeBanzMC(numNodes, adj, maxIteration, stepfunc,  numThresholdEdges, Wcu
         for j in copyOfNodes:
             if (random.randint(0,1)):
                  coalition.append(j)
-        print coalition         
+#        print coalition         
         banzMC =  stepfunc(numNodes, adj, coalition, numThresholdEdges, Wcutoff, influence_dist, payOff_function, distances, banzMC)
         myIter = myIter + 1
 
     for i in range(numNodes):    
-        banzMC[i] = banzMC[i] / float(maxIteration)
+        banzMC[i] = banzMC[i] * 2 / float(maxIteration)
     return banzMC 
 
 

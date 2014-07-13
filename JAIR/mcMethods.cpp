@@ -48,7 +48,7 @@ double shapMC[MAX_NODES];
 //LARGE_INTEGER start, stop, proc_freq;
 
 /* step in game 1 */
-void game1MCstep(int n, vector< pair<short,double> > *adj, short* shuffling ){
+void game1MCstep(int n, vector< pair<short,double> > *adj, short* shuffling){
 	int newV = 0;
 	short u = 0;
 
@@ -72,6 +72,8 @@ void game1MCstep(int n, vector< pair<short,double> > *adj, short* shuffling ){
 		shapMC[vert] += newV;
 	}
 }
+
+
 
 void game1MCstepAdapter(int n, vector< pair<short,double> > *adj, short * shuffling,
 					    int *k, double *Wcutoff, vector<short> *D,double (*f)(double), vector<double>* waga){
@@ -217,6 +219,9 @@ void shuffle(short* tab, int n) {
 	}
 }
 
+
+
+
 void computeShapMC(int n, vector< pair<short,double> > *adj, int maxIteration, double *shapExact,
 			void (*step)(int , vector< pair<short,double> >* ,  short*, int*, double*,  vector<short>*,
 					double (*f)(double), vector<double>* ),int *k, double *Wcutoff, vector<short> *D,
@@ -280,5 +285,8 @@ void computeMCGame5(int n, vector< pair<short,double> >* adj, int maxIteration,
 					double *Wcutoff, double* shapExact){
 	computeShapMC(n, adj, maxIteration, shapExact, game5MCstepAdapter,0,Wcutoff,0,0,0);
 }
+
+
+
 
 

@@ -30,7 +30,7 @@
 #define MAX_NODES 16706
 #define G1 "power.txt"
 #define G2 "astro-ph.txt"
-
+#define G3 "4node.txt"
 
 const double INFI = std::numeric_limits<double>::max();
 

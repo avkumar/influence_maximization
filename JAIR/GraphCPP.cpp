@@ -110,9 +110,14 @@ int main(void)
 
     ofstream myfile ("example.txt");
 	maxIteration = 3200;
-	readGraph(G1,true);
+	readGraph(G3,true);
     computeExactGame1(n, adj);
-    computeMCGame1(n, adj, maxIteration, shapExact);
+//    computeMCGame1(n, adj, maxIteration, shapExact);
+    double Wcutoff[n+1];
+    for (short i = 1; i < n + 1; i ++){
+        Wcutoff[i] = 1;
+    }    
+    computeMCGame5(n, adj, maxIteration, Wcutoff, shapMC);
     if (myfile.is_open())
     {
       myfile << "This is a line.\n";

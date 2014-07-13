@@ -37,12 +37,11 @@ double shapApprox[MAX_NODES];
 void computeExactGame1(int n, vector< pair<short,double> >* adj) {
 	short u = 0;
 	for (unsigned short i=1; i<=n; i++) {
-		shapExact[i] = (1.0 / (1.0 + adj[i].size()));
+		shapExact[i] = (1.0 /  (1 +  ( adj[i].size())) );
 
 		 for (unsigned short j=0; j<adj[i].size(); j++) {
 			 u = adj[i][j].first;
-//			 shapExact[i] += (1.0 / (1.0 + adj[u].size()));
-             shapExact[i] += (1.0 / pow( 2.0, int(adj[u].size())) );
+			 shapExact[i] += (1.0 / (1.0 + adj[u].size()));
 		 }
 	}
 }

@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-
+import time
 import exactMethods
 import mcMethods
 from exactMethods import computeShapExactGame1
@@ -72,87 +72,24 @@ def readRandomGraph(size):
             
                         
 
-
-'''
-
-void readRandomGraph(int size){
-    double weight ;
-    n = size;
-    for (int i=0; i<n; i++)
-    	adj[i].clear();
-
-    for (int i=0; i<n; i++)
-    {
-    	for (int j=0; j<n; j++) {
-    		weight = (double)rand()/(double)RAND_MAX;
-            adj[i].push_back( pair<short,double>(j,weight) );
-            adj[j].push_back( pair<short,double>(i,weight) );
-    	}
-    }
-}
-'''
-def countAvgDist(G1):
+def countAvgDist(dist ):
     return 1 
 
 
-'''
-double countAvgDist(){
-    double avgDis=0;
-    int count = 0;
-    for (int i=0; i<n; i++) {
-    	 for (int j=0; j<n; j++) {
-    		 if (distances[i][j] != INFI) {
-    			 avgDis +=distances[i][j];
-    			 count++;
-    		 }
-    	 }
-    }
-    avgDis /= (double)count;
-    return avgDis;
-}
-'''
-
-'''
-int main(void)
-{
-
-    srand(time(0));
-    int maxIteration = 0;
-    cout.precision(15);
-
-    ofstream myfile ("example.txt");
-	maxIteration = 3200;
-	readGraph(G1,true);
-    computeExactGame1(n, adj);
-    computeMCGame1(n, adj, maxIteration, shapExact);
-    if (myfile.is_open())
-    {
-      myfile << "This is a line.\n";
-   	for (short i=1; i<n+1; i++) {
-		myfile<<i<<" "<<shapExact[i]<<" "<<shapMC[i]<<endl;
-	}
-
-     myfile << "This is another line.\n";
-      myfile.close();
-    }
-
-
-    return 0;
-}
-
-'''
 def getWcutoff (numNodes):
     Wcutoff = [1]*numNodes
     return Wcutoff
 
+
 if __name__ =="__main__":
+    start_time = time.time()
     maxIteration = 0
-    maxIteration = 12
+    maxIteration = 1200
     G1 = 'power.txt'
     G2 = 'astro-ph.txt'
     G3 = '4node.txt'
-    numNodes, numEdges,  adj =  readGraph(G3, True)
-    print numNodes, numEdges, adj
+    numNodes, numEdges,  adj =  readGraph(G1, True)
+#    print numNodes, numEdges, adj
 #    shapExactGame1 = computeShapExactGame1(numNodes, adj) 
 #    print "shapExactGame1 is ", shapExactGame1 
 #    banzExactGame1 = computeBanzExactGame1(numNodes, adj)
@@ -181,8 +118,10 @@ if __name__ =="__main__":
 #    banzExactBrute =  computeBanzBruteForceGame5(numNodes, adj, Wcutoff)
 #    banzExactBruteGame5 = computeBanzBruteForceGame5(numNodes, adj, Wcutoff)
 #    print banzExactBruteGame5
-#    shapMCGame5 = computeMCGame5(numNodes, adj, maxIteration, Wcutoff, 'shap')
-#    print shapMCGame5
+    shapMCGame5 = computeMCGame5(numNodes, adj, maxIteration, Wcutoff, 'shap')
+    print shapMCGame5
     banzMCGame5 = computeMCGame5(numNodes, adj, maxIteration, Wcutoff , 'banz')
     print banzMCGame5
+
+    print("--- %s seconds ---" % time.time() - start_time)
 #
