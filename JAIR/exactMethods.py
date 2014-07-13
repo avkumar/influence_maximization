@@ -2,19 +2,14 @@ import math
 import itertools 
 from itertools import permutations
 from itertools import chain, combinations
-'''
-void computeExactGame1(int n, vector< pair<short,double> >* adj) {
-	short u = 0;
-	for (unsigned short i=1; i<=n; i++) {
-		shapExact[i] = (1.0 / (1.0 + adj[i].size()));
 
-		 for (unsigned short j=0; j<adj[i].size(); j++) {
-			 u = adj[i][j].first;
-             shapExact[i] += (1.0 / pow( 2.0, int(adj[u].size())) );
-		 w
-	}
-}
-'''
+from operator import mul    # or mul=lambda x,y:x*y
+from fractions import Fraction
+
+def nCk(n,k): 
+  return int( reduce(mul, (Fraction(n-i, i+1) for i in range(k)), 1) )
+
+
 
 print "in exactMethods.py"
 def computeBanzExactGame1(numNodes, adj):
@@ -49,23 +44,6 @@ def computeShapExactGame1(numNodes, adj):
 
 
 
-'''
-void computeExactGame2(int n, vector< pair<short,double> >* adj, int *k){
-	short u = 0;
-
-	for (unsigned short i=1; i<=n; i++) {
-		shapExact[i] = min(1.0,  ((double)k[i])/(1.0+ (double)adj[i].size()) );
-
-		 for (unsigned short j=0; j<adj[i].size(); j++) {
-			 u = adj[i][j].first;
-			 double degree = (double)adj[u].size();
-
-			 shapExact[i] += max(0.0, ( degree - (double)k[u] + 1.0)/
-					 	( degree*(1.0+degree))  );
-		 }
-	 }
-}
-'''
 def computeShapExactGame2(numNodes, adj, numThreshold):
     shapExact = [0]*numNodes
     for i in range(numNodes):
@@ -76,7 +54,16 @@ def computeShapExactGame2(numNodes, adj, numThreshold):
     return shapExact
     					 
 
-
+def computeShapExactGame2(numNodes, adj, numThreshold):
+    banzExact = [0]*numNodes
+    for vert in range(numNodes):
+        if adj.__contains__(vert):
+            for r in range(numThreshold[vert]):
+                banzExact[vert] +=     nCk ( len(adj[vert]), r) * (1.0 / pow(2.0,  len(adj[vert]) )  )
+        for u in adj[vert]:
+            banzExact[vert] +=     nCk( len(adj[u]) - 1, numThreshold[u] - 1) * (1.0 / pow(2.0,  len(adj[u]) )  )
+    return banzExact
+ 
 
 '''
 void computeExactGame3(int n, vector< pair<short,double> >* adj, vector<short> *D){
