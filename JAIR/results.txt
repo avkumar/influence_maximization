@@ -1,0 +1,22 @@
+Rate of convergence is faster in shapley value than in Banzhaf index in 2 cases i.e. in for both 4k node graph and 16k node graph
+Number of values to which the influence spread is more for banzhaf in 16k node graph under conditions of Wcutoff = 1 for all nodes
+
+The intuitive nature of Banzhaf index is that the index value will be more for nodes that are least connected similar to that of Shapley value. It differs from Shapley index in the nature that the nodes that are well connected and are neighbors with well connected nodes are more penalised.(degrees are raised to the powers of 2 while compared to 1)
+
+The Banzhaf paper assumes banzhaf value for a coalitional game i.e. 0 or 1. Hence the proofs given by him may not apply.
+Also in his experiment for a given epsilon and delta shapley value requires lesser samples than that of banzhaf index
+
+several directions for future work. 
+
+
+First, we note that for restricted domains, it might be possible to exactly calculate power indices, or find ways to obtain better approximations. For example, it may be possible to achieve good deterministic algorithms and approximation algorithms with better quality for calculating power indices in restricted weighted voting games or restricted  network reliability domains. 
+    
+   For the four games  mentioned in the Ravindran's paper exact methods are shown to be very well performing compared to MC computations
+
+  
+    Second, although our approximation method can  be used for both the Banzhaf index and the Shapley-Shubik index, it would  be interesting to see if there are domains where one index can be polynomially
+    computed, while the other is hard
+
+    It can be seen that Banzhaf index can be prepared for game5 but not for game4
+
+
