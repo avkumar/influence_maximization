@@ -79,23 +79,31 @@ def countAvgDist(dist ):
 
 
 def getWcutoff (numNodes):
-    Wcutoff = [1]*numNodes
+    Wcutoff = [0]*numNodes
     return Wcutoff
 
+def rankNodes(powerIndices):
+    idx = sorted(xrange(len(powerIndices)), key=powerIndices.__getitem__)
+    idx.reverse()
+    return idx
+
+    
 
 if __name__ =="__main__":
     start_time = time.time()
     maxIteration = 0
-    maxIteration = 12000
+    maxIteration = 120
     G1 = 'power.txt'
     G2 = 'astro-ph.txt'
     G3 = '4node.txt'
-    numNodes, numEdges,  adj =  readGraph(G2, True)
+    numNodes, numEdges,  adj =  readGraph(G1, True)
 #    print numNodes, numEdges, adj
-#    shapExactGame1 = computeShapExactGame1(numNodes, adj) 
-#    print "shapExactGame1 is ", shapExactGame1 
-#    banzExactGame1 = computeBanzExactGame1(numNodes, adj)
-#    print "banzExactGame1 is", banzExactGame1
+    shapExactGame1 = computeShapExactGame1(numNodes, adj) 
+    print "shapExactGame1 is ", shapExactGame1 
+    banzExactGame1 = computeBanzExactGame1(numNodes, adj)
+    print "banzExactGame1 is", banzExactGame1
+    nodesRankedByShap = rankNodes(shapExactGame1)       
+    nodesRankedByBanz = rankNodes(banzExactGame1)
 #    shapMCGame1 = computeMCGame1(numNodes, adj, maxIteration, 'shap')
 #    print "shapMCGame1 is", shapMCGame1
 #    banzMCGame1 = computeMCGame1(numNodes, adj, maxIteration, 'banz')
@@ -131,12 +139,17 @@ if __name__ =="__main__":
 #    banzExactBrute =  computeBanzBruteForceGame5(numNodes, adj, Wcutoff)
 #    banzExactBruteGame5 = computeBanzBruteForceGame5(numNodes, adj, Wcutoff)
 #    print banzExactBruteGame5
- #   shapMCGame5 = computeMCGame5(numNodes, adj, maxIteration, Wcutoff, 'shap')
- #   print shapMCGame5
-  #  banzMCGame5 = computeMCGame5(numNodes, adj, 1200, Wcutoff , 'banz')
-  #  print banzMCGame5
-    print computeSpread(numNodes, adj, shapNodes, Wcutoff, 20)
 
-    print computeSpread(numNodes, adj, banzNodes, Wcutoff, 20)
+#    shapMCGame5 = computeMCGame5(numNodes, adj, 12000, Wcutoff, 'shap')
+#    print shapMCGame5
+#    print time.time() - start_time
+#    banzMCGame5 = computeMCGame5(numNodes, adj, 12000, Wcutoff , 'banz')
+#    print banzMCGame5
+#    print len(shapNodes),  len(banzNodes)
+    for i in range(20):
+        
+        print computeSpread(numNodes, adj, nodesRankedByShap[0:5*i], Wcutoff, 30)
+
+        print computeSpread(numNodes, adj, nodesRankedByBanz[0:5*i], Wcutoff, 30)
     print time.time() - start_time
 #
