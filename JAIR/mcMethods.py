@@ -1,5 +1,5 @@
 import random
-
+import numpy as np
 
 
 def game1MCShapstep(numNodes, adj, shuffling, shapMC):
@@ -19,26 +19,25 @@ def game1MCShapstep(numNodes, adj, shuffling, shapMC):
 
 
 def game1MCBanzstep(numNodes, adj, coalition,  banzMC):
-    numCounted = [0]*numNodes
+        
+    Nodes = [i for i in range(numNodes)]
+    Counted=[False]*numNodes
     for vert in coalition:
-        numCounted[vert] += 1
-        for u in adj[vert]:
-            numCounted[u] += 1 
-            
-    for vert in range(numNodes):
-        if vert in coalition:
-            if numCounted[vert] <= 1:
-                banzMC[vert] += 1
+        Counted[vert] = True
+        if adj.__contains__(vert):
             for u in adj[vert]:
-                if numCounted[u] <= 1:
-                    banzMC[vert] += 1
-        else:
-            if numCounted[vert] == 0:
-                 banzMC[vert] += 1
-            for u in adj[vert]:
-                 if numCounted[u] is 0:
-                     banzMC[vert] += 1
+                Counted[u] = True
 
+    nonCoalition = set(Nodes) - set(coalition)
+    for vert in nonCoalition:
+          if not Counted[vert]:
+              banzMC[vert] += 1
+          if adj.__contains__(vert):
+              for u in adj[vert]:
+                  if not Counted[u]:
+                      banzMC[vert] += 1
+                                
+                  
     return banzMC
 
 
@@ -54,42 +53,6 @@ def game1MCBanzstepAdapter(numNodes, adj, copyOfNodes, numThresholdEdges, Wcutof
     banzMC = game1MCBanzstep(numNodes, adj, copyOfNodes, indexMC)
     return banzMC
 
-'''
-void game2MCstep(int n, vector< pair<short,double> >* adj, short* shuffling , int *k){
-	int newV = 0;
-	short u = 0;
-
-	for (short i=0; i<n; i++){
-		Counted[i] = false;
-		Edges[i] = 0;
-	}
-
-	 for (short i=0; i<n; i++) {
-		short vert = shuffling[i];
-		newV = 0;
-		for (unsigned short j=0; j<adj[vert].size(); j++) {
-			u = adj[vert][j].first;
-			if ( !Counted[u] ) {
-				Edges[u]++;
-				if(Edges[u] >= k[u]) {
-					newV++;
-					Counted[u] = true;
-				}
-			}
-		}
-		if (!Counted[vert]){
-			newV++;
-			Counted[vert] = true;
-		}
-		shapMC[vert] += newV;
-	}
-}
-
-void game2MCstepAdapter(int n, vector< pair<short,double> > *adj, short * shuffling,
-					    int *k, double *Wcutoff, vector<short> *D, double (*f)(double), vector<double>* waga){
-	game2MCstep(n, adj, shuffling, k);
-}
-'''
 
 def game2MCShapstep (numNodes, adj, shuffling, numThresholdEdges, shapMC):
     Counted = [0]*False
@@ -111,43 +74,29 @@ def game2MCShapstep (numNodes, adj, shuffling, numThresholdEdges, shapMC):
 
 
 def game2MCBanzstep (numNodes,  adj, coalition , numThresholdEdges,  banzMC):
-
-    def findBanzMC(vert, coalition, Edges):
-
-        banzMC_vert_val = 0
+    Nodes = [i for i in range(numNodes)]
+    Edges = [0]*numNodes
+    Counted=[False]*numNodes
+    for vert in coalition:
+        Counted[vert] = True
         if adj.__contains__(vert):
             for u in adj[vert]:
-                if coalition:
-                     if u not in coalition:
-                         Edges[u] += 1
-                         if Edges[u] == numThresholdEdges[u]:
-                             banzMC_vert_val += 1
-            if Edges[vert] < numThresholdEdges[vert]:
-                banzMC_vert_val += 1
-
-        return banzMC_vert_val
-
-    def computeEdges(coalition):  
-        Edges = [0] * numNodes  
-        for vert in coalition:
-            for u in adj[vert]:
                 Edges[u] += 1
-        return Edges
+                if Edges[u] >= numThresholdEdges[u]:    
+                    Counted[u] = True
 
-    for vert in range(numNodes):
-        if vert in coalition:
-            coalition_cpy = list(coalition)
-            coalition_cpy.remove(vert)
-            Edges = computeEdges(coalition_cpy)
-            banzMC[vert] = findBanzMC(vert, coalition_cpy, Edges)
-        else:
-            Edges = computeEdges(coalition)
-            banzMC[vert] = findBanzMC(vert, coalition, Edges)
-     
 
+    nonCoalition = set(Nodes) - set(coalition)
+    for vert in nonCoalition:
+          if not Counted[vert]:
+              banzMC[vert] += 1
+          if adj.__contains__(vert):
+              for u in adj[vert]:
+                  if not Counted[u]:
+                     if  Edges[u] + 1 == numThresholdEdges[u] :
+                         banzMC[vert] += 1
+                                
     return banzMC
-
-
             
 
 def game2MCShapstepAdapter(numNodes, adj, copyOfNodes, numThresholdEdges, Wcutoff, influence_dist, payOff_function, distances, indexMC):
@@ -215,14 +164,14 @@ def game5MCBanzstep (numNodes,  adj, coalition , Wcutoff,  banzMC):
     Weights = [0]*numNodes
     for vert in coalition:
         Counted[vert] = True
-        for u in adj[vert]:
-            Weights[u] += adj[u][vert]
-            if Weights[u] >= Wcutoff[u]:
-                Counted[u] = True
-                
-
-    for vert in range(numNodes):
-        if vert not in coalition:
+        if adj.__contains__(vert):
+            for u in adj[vert]:
+                Weights[u] += adj[u][vert]
+                if Weights[u] >= Wcutoff[u]:
+                    Counted[u] = True
+                    
+    nonCoalition =  set(Nodes) - set(coalition) 
+    for vert in nonCoalition :
             if not Counted[vert]:
                 banzMC[vert] += 1
             if adj.__contains__( vert ): 
@@ -240,13 +189,14 @@ def game5MCShapstep (numNodes,  adj, shuffling , Wcutoff, shapMC):
    for i in range(numNodes):
         vert = shuffling[i]
         newV = 0
-        for u in adj[vert]:
-            weight = adj[vert][u]
-            if not Counted[u]:
-                Weights[u]+= weight
-                if(Weights[u] >= Wcutoff[u]):
-                    newV = newV +1
-                    Counted[u] = True
+        if adj.__contains__(vert):
+            for u in adj[vert]:
+                weight = adj[vert][u]
+                if not Counted[u]:
+                    Weights[u]+= weight
+                    if(Weights[u] >= Wcutoff[u]):
+                        newV = newV +1
+                        Counted[u] = True
         if not Counted[vert]:
             newV = newV+ 1
             Counted[vert] = True
@@ -272,6 +222,7 @@ def computeShapMC(numNodes, adj, maxIteration, stepfunc, numThresholdEdges, Wcut
 
     shapMC = [0]* numNodes    
     myIter = 1
+    shapMCForIter = np.zeros( shape=(maxIteration/5, numNodes))
     while myIter <= maxIteration:
         copyOfNodes = range(numNodes)
         random.shuffle(copyOfNodes)
@@ -279,9 +230,13 @@ def computeShapMC(numNodes, adj, maxIteration, stepfunc, numThresholdEdges, Wcut
         shapMC =  stepfunc(numNodes, adj, copyOfNodes, numThresholdEdges, Wcutoff, influence_dist, payOff_function, distances, shapMC)
     	myIter = myIter + 1
 
+        if myIter % 5 is 0:
+                shapMCForIter[myIter/5 - 1] = np.array(shapMC) / float(myIter)
+
+              
     for i in range(numNodes):    
         shapMC[i] = shapMC[i] / float(maxIteration)
-    return shapMC 
+    return shapMC, shapMCForIter 
 
 
 
@@ -289,19 +244,22 @@ def computeBanzMC(numNodes, adj, maxIteration, stepfunc,  numThresholdEdges, Wcu
 
     banzMC = [0]* numNodes    
     myIter = 1
+    banzMCForIter = np.zeros( shape=(maxIteration/5, numNodes))
     while myIter <= maxIteration:
         copyOfNodes = range(numNodes)
         coalition = []
         for j in copyOfNodes:
             if (random.randint(0,1)):
                  coalition.append(j)
-#        print coalition         
         banzMC =  stepfunc(numNodes, adj, coalition, numThresholdEdges, Wcutoff, influence_dist, payOff_function, distances, banzMC)
         myIter = myIter + 1
+        if myIter % 5 is 0:
+                banzMCForIter[myIter/5 - 1] = np.array(banzMC) * 2 / float(myIter)
 
+              
     for i in range(numNodes):    
         banzMC[i] = banzMC[i] * 2 / float(maxIteration)
-    return banzMC 
+    return banzMC, banzMCForIter 
 
 
 
@@ -380,31 +338,5 @@ def computeMCGame5(numNodes, adj, maxIteration, Wcutoff, powerIndex ):
 
 
 
-
-'''
-
-
-void computeMCGame1(int n, vector< pair<short,double> > *adj, int maxIteration, double *shapExact){
-	computeShapMC(n, adj, maxIteration, shapExact, game1MCstepAdapter,0,0,0,0,0);
-}
-void computeMCGame2(int n, vector< pair<short,double> >* adj, int maxIteration,
-					int *k, double* shapExact){
-	computeShapMC(n, adj, maxIteration, shapExact, game2MCstepAdapter,k,0,0,0,0);
-}
-void computeMCGame3(int n, vector< pair<short,double> >* adj, int maxIteration,
-					vector<short> *D, double* shapExact){
-	computeShapMC(n, adj, maxIteration, shapExact, game3MCstepAdapter,0,0,D,0,0);
-}
-void computeMCGame4(int n, vector< pair<short,double> >* adj, int maxIteration,
-				 	double (*f)(double), vector<double>* distances, double* shapExact){
-	computeShapMC(n, adj, maxIteration, shapExact, game4MCstepAdapter,0,0,0,(*f),distances);
-}
-void computeMCGame5(int n, vector< pair<short,double> >* adj, int maxIteration,
-					double *Wcutoff, double* shapExact){
-	computeShapMC(n, adj, maxIteration, shapExact, game5MCstepAdapter,0,Wcutoff,0,0,0);
-}
-
-
-'''
 
 

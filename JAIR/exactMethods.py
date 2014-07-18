@@ -13,32 +13,22 @@ def nCk(n,k):
 
 print "in exactMethods.py"
 def computeBanzExactGame1(numNodes, adj):
-    banzExact = []
-    print "in computeExactgame1"
-    print numNodes, adj[0], adj[1]
-    for i in range(0, numNodes):
-        banzExact.append(1.0 / pow(2.0,  len(adj[i]) ) )
-        if i == 1:
-            print banzExact[1]
+    banzExact = [0]*numNodes
+    for i in range(numNodes):
+        banzExact[i] += (1.0 / pow(2.0,  len(adj[i]) ) )
         for u in adj[i]:
             banzExact[i] += ( 1.0 / pow( 2.0, len( adj[u] ))  )
-            if i == 1:
-                print (1.0 / pow(2, len(adj[u]))) 
-    print len(banzExact)    
     return banzExact
 
 print "in exactMethods.py"
 def computeShapExactGame1(numNodes, adj):
     shapExact = [0]*numNodes
-    print "in computeExactgame1"
-    print numNodes, adj[0], adj[1]
     for i in range(0, numNodes):
         if adj.__contains__(i):
             shapExact[i] += (1.0 / ( 1 +  len(adj[i]))  )
             for u in adj[i]:
                 if adj[i].__contains__(u):
                     shapExact[i] += ( 1.0 / (1 +  len( adj[u] ))  )
-    print len(shapExact)    
     return shapExact
 
 
@@ -54,39 +44,38 @@ def computeShapExactGame2(numNodes, adj, numThreshold):
     return shapExact
     					 
 
-def computeShapExactGame2(numNodes, adj, numThreshold):
+def computeBanzExactGame2(numNodes, adj, numThreshold):
     banzExact = [0]*numNodes
     for vert in range(numNodes):
         if adj.__contains__(vert):
-            for r in range(numThreshold[vert]):
+            for r in range(int (numThreshold[vert])):
                 banzExact[vert] +=     nCk ( len(adj[vert]), r) * (1.0 / pow(2.0,  len(adj[vert]) )  )
-        for u in adj[vert]:
-            banzExact[vert] +=     nCk( len(adj[u]) - 1, numThreshold[u] - 1) * (1.0 / pow(2.0,  len(adj[u]) )  )
+            for u in adj[vert]:
+                banzExact[vert] +=     nCk( len(adj[u]) - 1, int (numThreshold[u] ) - 1 ) * (1.0 / pow(2.0,  len(adj[u]) )  )
     return banzExact
  
 
-'''
-void computeExactGame3(int n, vector< pair<short,double> >* adj, vector<short> *D){
-
-	for (unsigned short i=0; i<n; i++) {
-		 for (unsigned short j=0; j<D[i].size(); j++) {
-			 double extDegree = D[D[i][j]].size() - 1;
-			 shapExact[i] += (1.0 / (1.0 + extDegree));
-		 }
-	}
-}
-
-'''
 def computeShapExactGame3(numNodes, adj, D):
     for i in range(numNodes):
         for u in D[i]:
             extDegree = len(D[u]) - 1
             shapExact +=  (1.0 / (1.0 + extDegree)) 
 
+def computeBanzExactGame3(numNodes, adj, D):
+    banzExact = [0]*numNodes
+    for vert in range(numNodes):
+        for u in D[vert]:
+            extDegree = len(D[u]) - 1
+            banzExact[vert] +=  (1.0 / pow(2.0, extDegree)) 
+    return banzExact
+            
+            
+
+
+
+
 
 '''
-
-
 void computeExactGame4(int n, vector< pair<short,double> >* adj, double (*f)(double), vector<double> *distances, vector<short> *D) {
 
 	for (short i=1; i<=n; i++)

@@ -3,12 +3,12 @@
 def computeSpread(numNodes,  adj, selectedNodes, Wcutoff, numIterations):
     active = [False]* numNodes
     Weights = [0]* numNodes
-    print numNodes
     for node in selectedNodes:
 #       print node
        active [node] = True
 
     newActiveNodes = list(selectedNodes)
+    numActiveNodesAtIter = [0]*numIterations
 
     for iter in range(numIterations):
         lastIterActivatedNodes = list(newActiveNodes)
@@ -20,5 +20,6 @@ def computeSpread(numNodes,  adj, selectedNodes, Wcutoff, numIterations):
                         Weights[u] += adj[u][node] 
                         if Weights[u] > Wcutoff[u]:
                             active[u] = True
-                            newActiveNodes.append(u)           
-    return sum(active)
+                            newActiveNodes.append(u)          
+        numActiveNodesAtIter[iter] = sum(active)                    
+    return numActiveNodesAtIter
