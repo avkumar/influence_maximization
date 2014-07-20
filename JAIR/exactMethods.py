@@ -11,7 +11,6 @@ def nCk(n,k):
 
 
 
-print "in exactMethods.py"
 def computeBanzExactGame1(numNodes, adj):
     banzExact = [0]*numNodes
     for i in range(numNodes):
@@ -20,7 +19,7 @@ def computeBanzExactGame1(numNodes, adj):
             banzExact[i] += ( 1.0 / pow( 2.0, len( adj[u] ))  )
     return banzExact
 
-print "in exactMethods.py"
+
 def computeShapExactGame1(numNodes, adj):
     shapExact = [0]*numNodes
     for i in range(0, numNodes):
@@ -30,8 +29,6 @@ def computeShapExactGame1(numNodes, adj):
                 if adj[i].__contains__(u):
                     shapExact[i] += ( 1.0 / (1 +  len( adj[u] ))  )
     return shapExact
-
-
 
 
 def computeShapExactGame2(numNodes, adj, numThreshold):
@@ -70,10 +67,37 @@ def computeBanzExactGame3(numNodes, adj, D):
     return banzExact
             
             
-
-
-
-
+def computeBanzExactGame4(numNodes, adj, f, distances,D  ):
+    banzExact = [0]*numNodes
+    for vert in range(numNodes):
+        print vert
+        for u in range(numNodes):
+            if u != vert:                
+                distance = distances[vert][u]
+                denom_component1 = 1.0 / pow(2.0, D[u].index(vert)) 
+                component1 = f(distance) * denom_component1
+                print "distance is", f(distance)
+                print "component 1 is", component1
+                component2 = 0
+                index = D[u].index(vert) - 1
+                print index
+                while index < len(D[u]):
+                    nodesWithSameDist = 0
+                    while index + 1 < len(D[u]):
+                        if distances[D[u][index + 1]][u] == distances[D[u][index]][u]:
+                            nodesWithSameDist += 1
+                            index += 1
+                            print "in if", index 
+                        else:
+                            component2 += (f(distances[D[u][index]][u]) * nodesWithSameDist * (1.0/ pow(2.0, index)) )
+                            break 
+                    if index + 1 is len(D[u]):
+                       component2 += f(distances[D[u][index]][u]) * nodesWithSameDist 
+                       print "component2 is ", component
+                       index += 1
+                print component2 
+                banzExact[vert] += (component1 - component2  )
+    return banzExact
 
 '''
 void computeExactGame4(int n, vector< pair<short,double> >* adj, double (*f)(double), vector<double> *distances, vector<short> *D) {

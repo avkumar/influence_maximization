@@ -111,9 +111,8 @@ def game2MCBanzstepAdapter(numNodes, adj, copyOfNodes, numThresholdEdges, Wcutof
 
 
 
-def game3MCShapstep(numNodes, adj, shuffling, influence_dist):
+def game3MCShapstep(numNodes, adj, shuffling, D, shapMC):
     Counted = [0] * False
-    Edges = [0] * False
     for i in range(numNodes):
         vert = shuffling[i]
         for u in D[vert]:
@@ -124,6 +123,32 @@ def game3MCShapstep(numNodes, adj, shuffling, influence_dist):
         if not Counted[vert]:
             shapMC[vert] += 1
             Counted[vert] = True
+        shapMC[vert]+= 1
+        
+    return shapMC
+         
+
+
+def game3MCBanzstep(numNodes, adj, coalition, D, banzMC):
+        
+    Nodes = [i for i in range(numNodes)]
+    Counted=[False]*numNodes
+    for vert in coalition:
+        Counted[vert] = True
+        if D.__contains__(vert):
+            for u in D[vert]:
+                Counted[u] = True
+
+    nonCoalition = set(Nodes) - set(coalition)
+    for vert in nonCoalition:
+          if D.__contains__(vert):
+              for u in D[vert]:
+                  if not Counted[u]:
+                      banzMC[vert] += 1
+    return banzMC
+
+
+
             
 
 def game3MCShapstepAdapter(numNodes, adj, copyOfNodes, numThresholdEdges, Wcutoff, influence_dist, payOff_function, distances, indexMC):
@@ -137,14 +162,40 @@ def game3MCBanzstepAdapter(numNodes, adj, copyOfNodes, numThresholdEdges, Wcutof
 
 
 
-def game4MCShapstep(numNodes, adj, shuffling, payOff_function, distances):
-    Dist =  [1000]*numNodes
+def game4MCBanzstep(numNodes, adj, coalition, payOff_function, distances, D, banzMC):
+
+    Nodes = [i for i in range(numNodes)]
+    nonCoalition = set(Nodes) - set(coalition)
+    for vert in nonCoalition: 
+        for j in nonCoalition:
+            max = 10000000
+            for k in coalition:
+                if distance[k][j] < max:
+                    max = distance[vert][j]
+            if distance[vert][j] < max:
+                banzMC[vert] += ( payOff_function(distances[vert][j] ) - payOff_function(max))
+    print "returiing" 
+    return banzMC
+
+
+
+
+
+
+
+def game4MCShapstep(numNodes, adj, shuffling, payOff_function, distances, shapMC):
     for i in range(numNodes):
         vert = shuffling[i]
-        for j in range(numNodes):
-            if distance[vert][j] < Dist[j]:
-                shapMC[vert] +=( payOff_function(distances[vert][j] ) - payOff_function(Dist[j]) )
-                Dist[j] = distances[vert][j]
+        for j in shuffling[i + 1:]:
+            max = 1000000
+            for k in shuffling[1:i+1]:
+                 if distance[k][j] < max:
+                    max = distance[vert][j]
+            if distance[vert][j] < max:
+                shapMC[vert] += ( payOff_function(distances[vert][j] ) - payOff_function(max))
+    return shapMC
+
+
 
 def game4MCShapstepAdapter(numNodes, adj, copyOfNodes, numThresholdEdges, Wcutoff, influence_dist, payOff_function, distances, indexMC):
     shapMC = game4MCShapstep(numNodes, adj, copyOfNodes, payOff_function, distances, indexMC)
