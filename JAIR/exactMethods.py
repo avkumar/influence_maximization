@@ -45,7 +45,7 @@ def computeBanzExactGame2(numNodes, adj, numThreshold):
     banzExact = [0]*numNodes
     for vert in range(numNodes):
         if adj.__contains__(vert):
-            for r in range(int (numThreshold[vert])):
+            for r in range(int(numThreshold[vert])):
                 banzExact[vert] +=     nCk ( len(adj[vert]), r) * (1.0 / pow(2.0,  len(adj[vert]) )  )
             for u in adj[vert]:
                 banzExact[vert] +=     nCk( len(adj[u]) - 1, int (numThreshold[u] ) - 1 ) * (1.0 / pow(2.0,  len(adj[u]) )  )
@@ -67,7 +67,7 @@ def computeBanzExactGame3(numNodes, adj, D):
     return banzExact
             
             
-def computeBanzExactGame4(numNodes, adj, f, distances,D  ):
+def computeBanzExactGame4(numNodes, adj, f, distances, D):
     banzExact = [0]*numNodes
     for vert in range(numNodes):
         print vert

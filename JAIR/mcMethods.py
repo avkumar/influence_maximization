@@ -1,6 +1,6 @@
 import random
 import numpy as np
-
+import time
 
 def game1MCShapstep(numNodes, adj, shuffling, shapMC):
     Counted =  [False]*numNodes
@@ -145,6 +145,7 @@ def game3MCBanzstep(numNodes, adj, coalition, D, banzMC):
               for u in D[vert]:
                   if not Counted[u]:
                       banzMC[vert] += 1
+            
     return banzMC
 
 
@@ -270,7 +271,7 @@ def game5MCBanzstepAdapter(numNodes, adj, copyOfNodes, numThresholdEdges, Wcutof
 
 def computeShapMC(numNodes, adj, maxIteration, stepfunc, numThresholdEdges, Wcutoff, influence_dist,  payOff_function, distances):
 
-
+    start_time = time.time()
     shapMC = [0]* numNodes    
     myIter = 1
     shapMCForIter = np.zeros( shape=(maxIteration/5, numNodes))
@@ -283,19 +284,20 @@ def computeShapMC(numNodes, adj, maxIteration, stepfunc, numThresholdEdges, Wcut
 
         if myIter % 5 is 0:
                 shapMCForIter[myIter/5 - 1] = np.array(shapMC) / float(myIter)
-
+                timeMCForIter[myIter/5 - 1] = np.array(time.time() - start_time) / float(myIter)
               
     for i in range(numNodes):    
         shapMC[i] = shapMC[i] / float(maxIteration)
-    return shapMC, shapMCForIter 
+    return shapMC, shapMCForIter, timeMCForIter 
 
 
 
 def computeBanzMC(numNodes, adj, maxIteration, stepfunc,  numThresholdEdges, Wcutoff, influence_dist,  payOff_function, distances):
-
+    start_time = time.time()
     banzMC = [0]* numNodes    
     myIter = 1
     banzMCForIter = np.zeros( shape=(maxIteration/5, numNodes))
+    timeMCForIter = np.zeros( shape=(maxIteration/5, numNodes))
     while myIter <= maxIteration:
         copyOfNodes = range(numNodes)
         coalition = []
@@ -306,11 +308,11 @@ def computeBanzMC(numNodes, adj, maxIteration, stepfunc,  numThresholdEdges, Wcu
         myIter = myIter + 1
         if myIter % 5 is 0:
                 banzMCForIter[myIter/5 - 1] = np.array(banzMC) * 2 / float(myIter)
-
+                timeMCForIter[myIter/5 - 1] = np.array(time.time() - start_time) / float(myIter)
               
     for i in range(numNodes):    
         banzMC[i] = banzMC[i] * 2 / float(maxIteration)
-    return banzMC, banzMCForIter 
+    return banzMC, banzMCForIter, timeMCForIter 
 
 
 

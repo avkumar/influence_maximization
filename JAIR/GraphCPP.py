@@ -84,7 +84,12 @@ def getThreshold(numNodes, adj, const, frac):
     threshold = [0]*numNodes
     for vert in range(numNodes):
         if adj.__contains__(vert):
-            threshold[vert] = const + frac * len(adj[vert])  
+            threshold[vert] = (const + frac * (len(adj[vert])) ) 
+            if threshold[vert] - int (const + frac * (len(adj[vert])) ) > 0:
+                threshold[vert] = int (const + frac * (len(adj[vert])) ) + 1 
+            else:
+                threshold[vert] = const + frac * (len(adj[vert]))   
+                    
     return threshold
 
 def getWcutoff(numNodes, adj, const, frac):
@@ -118,7 +123,7 @@ def compareBanzGame1(numNodes, adj):
     print "banzExactGame1 is ", banzExactGame1 
     start_banzMCGame1 = time.time() 
     print "computation time for banzExactGame1 is ", start_banzMCGame1 - start_time 
-    banzMCGame1, banzMCForIter = computeMCGame1(numNodes, adj, 12000, 'banz')
+    banzMCGame1, banzMCForITer, timeMCForIter =  computeMCGame1(numNodes, adj, 12000, 'banz')
     print "banzMCGame1 is ", banzMCGame1
     print "computation time for banzMCGame1 is", time.time() - start_banzMCGame1
     marginalError = []
@@ -138,7 +143,7 @@ def compareBanzGame2(numNodes,adj,numThreshold):
     print "banzExactGame2 is ", banzExactGame2 
     start_banzMCGame2 = time.time()
     print "computation time for banzExactGame2 is ", start_banzMCGame2 - start_time 
-    banzMCGame2, banzMCForIter = computeMCGame2(numNodes, adj, 12000, numThreshold, 'banz')
+    banzMCGame2, banzMCForITer, timeMCForIter =  computeMCGame2(numNodes, adj, 120000, numThreshold, 'banz')
     print "banzMCGame2 is", banzMCGame2
     print "computation time for banzMCGame2 is", time.time() - start_banzMCGame2
     marginalError = []
@@ -158,7 +163,7 @@ def compareBanzGame3(numNodes, adj, D):
     print "banzExactGame3 is ", banzExactGame3 
     start_banzMCGame3 = time.time()
     print "computation time for banzExactGame3 is ", start_banzMCGame3 - start_time 
-    banzMCGame3, banzMCForIter = computeMCGame3(numNodes, adj, 120000, D, 'banz')
+    banzMCGame3, banzMCForIter, timeMCForIter =  computeMCGame3(numNodes, adj, 120000, D, 'banz')
     print "banzMCGame3 is", banzMCGame3
     print "computation time for banzMCGame3 is", time.time() - start_banzMCGame3
     marginalError = []
@@ -179,7 +184,7 @@ def compareBanzGame4(numNodes, adj, f, distances, D):
     print "banzExactGame4 is ", banzExactGame4 
     start_banzMCGame4 = time.time()
     print "computation time for banzExactGame4 is ", start_banzMCGame4 - start_time 
-    banzMCGame4, banzMCForIter = computeMCGame4(numNodes, adj, 12, D, 'banz')
+    banzMCGame4, banzMCForITer, timeMCForIter =  computeMCGame4(numNodes, adj, 12, D, 'banz')
     print "banzMCGame4 is", banzMCGame4
     print "computation time for banzMCGame4 is", time.time() - start_banzMCGame4
     marginalError = []
@@ -194,17 +199,17 @@ def compareBanzGame4(numNodes, adj, f, distances, D):
 
 def compareShapAndBanz(numNodes, adj, maxIterations, Wcutoff, numSteps, selectedNodes):
     start_time = time.time()
-    shapMCGame5, shapMCForIter = computeMCGame5(numNodes, adj, maxIterations, Wcutoff, 'shap')
+    shapMCGame5, shapMCForIter, timeMCForIter = computeMCGame5(numNodes, adj, maxIterations, Wcutoff, 'shap')
     filename = 'compareShapAndBanz_mErr'    
     f = open(filename, 'a')
     marginalError = []
     for iter in range(len(shapMCForIter)):
         marginalError.append(max(np.absolute(np.array(shapMCGame5) -np.array(shapMCForIter[iter]))/ (np.array(shapMCGame5) + np.array([0.00001]))))
     print marginalError     
-    print >> f, marginalError
+    print >> f, marginalError, timeMCForIter
     print shapMCGame5
     print time.time() - start_time
-    banzMCGame5, banzMCForIter = computeMCGame5(numNodes, adj, maxIterations,  Wcutoff , 'banz')
+    banzMCGame5, banzMCForITer, timeMCForIter =  computeMCGame5(numNodes, adj, maxIterations,  Wcutoff , 'banz')
     print banzMCGame5
     marginalError = []
     for iter in range(len(banzMCForIter)):
@@ -223,10 +228,6 @@ def compareShapAndBanz(numNodes, adj, maxIterations, Wcutoff, numSteps, selected
     print time.time() - start_time
 
 
-
-
-
-
 def execute(handler, Graph):
     numNodes, numEdges,  adj =  readGraph(Graph, True)
     if handler is 1:
@@ -235,12 +236,15 @@ def execute(handler, Graph):
         compareBanzGame2(numNodes, adj, getThreshold(numNodes, adj, 2, 0))
 
         compareBanzGame2(numNodes, adj, getThreshold(numNodes, adj, 0, 0.5))
-        compareBanzGame2(numNodes, adj, getThreshold(numNodes, adj, 0, .75))
+        compareBanzGame2(numNodes, adj, getThreshold(numNodes, adj, 0, 0.75))
     if handler is 3:
         distances, D = getDcutoff(numNodes, adj, 'inf')
         avgDis = computeAvgDist(numNodes, distances)
         print avgDis
-        distances,D = getDcutoff(numNodes, adj, avgDis)
+#        distances,D = getDcutoff(numNodes, adj, 2.0)
+        distances,D = getDcutoff(numNodes, adj, avgDis*0.25)
+        compareBanzGame3(numNodes, adj, D)
+        distances,D = getDcutoff(numNodes, adj, avgDis/8)
         compareBanzGame3(numNodes, adj, D)
     if handler is 4:
         distances, D = getDcutoff(numNodes, adj, 1)
@@ -258,7 +262,7 @@ if __name__ =="__main__":
     G1 = 'power.txt'
     G2 = 'astro-ph.txt'
     G3 = '4node.txt'
-    execute(3, G3)
+    execute(3, G1)
 
 ##   print numNodes, numEdges, adj
 #    shapExactGame1 = computeShapExactGame1(numNodes, adj) 
@@ -272,7 +276,7 @@ if __name__ =="__main__":
 ##    shapMCGame1 = computeMCGame1(numNodes, adj, maxIteration, 'shap')
 ##    print "shapMCGame1 is", shapMCGame1
 #    start_banzMCGame1 = time.time()
-#    banzMCGame1, banzMCForIter = computeMCGame1(numNodes, adj, maxIteration, 'banz')
+#    banzMCGame1, banzMCForITer, timeMCForIter =  computeMCGame1(numNodes, adj, maxIteration, 'banz')
 #    print time.time() - start_banzMCGame1
 #    print "banMCGame1 is", banzMCGame1
 ##    print "banzMCForIter is", banzMCForIter
