@@ -14,8 +14,11 @@ def nCk(n,k):
 def computeBanzExactGame1(numNodes, adj):
     banzExact = [0]*numNodes
     for i in range(numNodes):
+        print i
+        print (1.0 / pow(2.0,  len(adj[i]) ) ),
         banzExact[i] += (1.0 / pow(2.0,  len(adj[i]) ) )
         for u in adj[i]:
+            print u,(1.0 / pow(2.0,  len(adj[u]) ) ),
             banzExact[i] += ( 1.0 / pow( 2.0, len( adj[u] ))  )
     return banzExact
 
@@ -62,7 +65,7 @@ def computeBanzExactGame3(numNodes, adj, D):
     banzExact = [0]*numNodes
     for vert in range(numNodes):
         for u in D[vert]:
-            extDegree = len(D[u]) - 1
+            extDegree = len(D[u]) - 1 
             banzExact[vert] +=  (1.0 / pow(2.0, extDegree)) 
     return banzExact
             

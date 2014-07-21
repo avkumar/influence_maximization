@@ -12,7 +12,7 @@ from computeInfluence import computeSpread
 from exactMethods import computeBanzExactGame2
 from mcMethods import computeMCGame2
 import numpy as np
-from dijkstra import dijkstraDistances
+from dijkstra_improvable import dijkstraDistances
 from exactMethods import computeBanzExactGame3
 from mcMethods import computeMCGame3
 from exactMethods import computeBanzExactGame4
@@ -123,7 +123,7 @@ def compareBanzGame1(numNodes, adj):
     print "banzExactGame1 is ", banzExactGame1 
     start_banzMCGame1 = time.time() 
     print "computation time for banzExactGame1 is ", start_banzMCGame1 - start_time 
-    banzMCGame1, banzMCForITer, timeMCForIter =  computeMCGame1(numNodes, adj, 12000, 'banz')
+    banzMCGame1, banzMCForIter, timeMCForIter =  computeMCGame1(numNodes, adj, 12000, 'banz')
     print "banzMCGame1 is ", banzMCGame1
     print "computation time for banzMCGame1 is", time.time() - start_banzMCGame1
     marginalError = []
@@ -143,7 +143,7 @@ def compareBanzGame2(numNodes,adj,numThreshold):
     print "banzExactGame2 is ", banzExactGame2 
     start_banzMCGame2 = time.time()
     print "computation time for banzExactGame2 is ", start_banzMCGame2 - start_time 
-    banzMCGame2, banzMCForITer, timeMCForIter =  computeMCGame2(numNodes, adj, 120000, numThreshold, 'banz')
+    banzMCGame2, banzMCForIter, timeMCForIter =  computeMCGame2(numNodes, adj, 120000, numThreshold, 'banz')
     print "banzMCGame2 is", banzMCGame2
     print "computation time for banzMCGame2 is", time.time() - start_banzMCGame2
     marginalError = []
@@ -184,7 +184,7 @@ def compareBanzGame4(numNodes, adj, f, distances, D):
     print "banzExactGame4 is ", banzExactGame4 
     start_banzMCGame4 = time.time()
     print "computation time for banzExactGame4 is ", start_banzMCGame4 - start_time 
-    banzMCGame4, banzMCForITer, timeMCForIter =  computeMCGame4(numNodes, adj, 12, D, 'banz')
+    banzMCGame4, banzMCForIter, timeMCForIter =  computeMCGame4(numNodes, adj, 12, D, 'banz')
     print "banzMCGame4 is", banzMCGame4
     print "computation time for banzMCGame4 is", time.time() - start_banzMCGame4
     marginalError = []
@@ -209,7 +209,7 @@ def compareShapAndBanz(numNodes, adj, maxIterations, Wcutoff, numSteps, selected
     print >> f, marginalError, timeMCForIter
     print shapMCGame5
     print time.time() - start_time
-    banzMCGame5, banzMCForITer, timeMCForIter =  computeMCGame5(numNodes, adj, maxIterations,  Wcutoff , 'banz')
+    banzMCGame5, banzMCForIter, timeMCForIter =  computeMCGame5(numNodes, adj, maxIterations,  Wcutoff , 'banz')
     print banzMCGame5
     marginalError = []
     for iter in range(len(banzMCForIter)):
@@ -241,11 +241,14 @@ def execute(handler, Graph):
         distances, D = getDcutoff(numNodes, adj, 'inf')
         avgDis = computeAvgDist(numNodes, distances)
         print avgDis
-#        distances,D = getDcutoff(numNodes, adj, 2.0)
-        distances,D = getDcutoff(numNodes, adj, avgDis*0.25)
+
+        distances,D = getDcutoff(numNodes, adj, 3)
+        print distances, D
         compareBanzGame3(numNodes, adj, D)
-        distances,D = getDcutoff(numNodes, adj, avgDis/8)
-        compareBanzGame3(numNodes, adj, D)
+#        distances,D = getDcutoff(numNodes, adj, avgDis*0.25)
+#        compareBanzGame3(numNodes, adj, D)
+#        distances,D = getDcutoff(numNodes, adj, avgDis/8)
+#        compareBanzGame3(numNodes, adj, D)
     if handler is 4:
         distances, D = getDcutoff(numNodes, adj, 1)
                 
@@ -254,15 +257,20 @@ def execute(handler, Graph):
     if handler is 5:
         compareShapAndBanz(numNodes, adj, 300, getWcutoff(numNodes, adj, 0, 0).tolist(), 1000, 500)
     if handler is 6:
-#         print "executing 5"
-         print getDcutoff(numNodes, adj, 0)
-
+#        print "executing 5"
+         print getDcutoff(numNodes, adj, 2)
+    if handler is 7:
+        dist,D = dijkstraDistances(numNodes, adj, 1)
+        print dist
+        print D
 
 if __name__ =="__main__":
     G1 = 'power.txt'
     G2 = 'astro-ph.txt'
     G3 = '4node.txt'
+    G4 = '8node.txt'
     execute(3, G1)
+#    execute(3, G4)
 
 ##   print numNodes, numEdges, adj
 #    shapExactGame1 = computeShapExactGame1(numNodes, adj) 
@@ -276,7 +284,7 @@ if __name__ =="__main__":
 ##    shapMCGame1 = computeMCGame1(numNodes, adj, maxIteration, 'shap')
 ##    print "shapMCGame1 is", shapMCGame1
 #    start_banzMCGame1 = time.time()
-#    banzMCGame1, banzMCForITer, timeMCForIter =  computeMCGame1(numNodes, adj, maxIteration, 'banz')
+#    banzMCGame1, banzMCForIter, timeMCForIter =  computeMCGame1(numNodes, adj, maxIteration, 'banz')
 #    print time.time() - start_banzMCGame1
 #    print "banMCGame1 is", banzMCGame1
 ##    print "banzMCForIter is", banzMCForIter
