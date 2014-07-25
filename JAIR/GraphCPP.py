@@ -20,7 +20,37 @@ from mcMethods import computeMCGame4
 #from exactMethods import computeBanzExactGame2
 
 
-def readGraph(filename, isWeighted) :
+def readUndirectedGraph(filename, isWeighted) :
+    weight = 1.0
+    adj= {}
+    with open(filename) as f:
+        numNodes, numEdges = f.readline().split(',')
+        numNodes , numEdges = int (numNodes), int (numEdges)
+        for i in range(0,int (numEdges)):
+            if (isWeighted):
+                node1, node2, weight = f.readline().split(',')
+            else :
+                node1, node2 = f.readline().split(',')
+            node1, node2, weight = int (node1), int (node2), float (weight)    
+
+            if not adj.__contains__(node1):
+                adj[node1] = {}
+            if node2 in adj[node1]:     
+                adj[node1][node2] += float(weight)
+            else:
+                adj[node1][node2] = float(weight)
+                    
+            if not adj.__contains__(node2):
+                adj[node2] = {}
+            if node1 in adj[node2]:
+                adj[node2][node1] += float(weight)
+            else:    
+                adj[node2][node1] = float(weight)
+
+#    print adj        
+    return (numNodes, numEdges, adj)
+
+def readDirectedGraph(filename, isWeighted) :
     weight = 1.0
     adj= {}
     with open(filename) as f:
@@ -36,9 +66,6 @@ def readGraph(filename, isWeighted) :
             if not adj.__contains__(node1):
                 adj[node1] = {}
             adj[node1][node2] = float(weight)
-            if not adj.__contains__(node2):
-                adj[node2] = {}
-            adj[node2][node1] = float(weight)
 
 #    print adj        
     return (numNodes, numEdges, adj)
@@ -105,175 +132,360 @@ def getWcutoff(numNodes, adj, const, frac):
 def getDcutoff(numNodes, adj, d_cutoff):
     print "d_cutoff is", d_cutoff
     distances, D = dijkstraDistances(numNodes, adj, d_cutoff)
+    print distances
     return distances, D
 
 
 def f1(x):
-  #  return 1.0/(1 + x)
-    return 1.0
+    if x is 'inf':
+        return 0
+    return float (1.0/(1 + x))
+  #  return 1.0
 
 def f2(x):
-    return 1.0/pow(2, x)
+    if x is 'inf':
+        return 0
+    return 1.0/(1 + pow(2.0, x))
         
 
-
-def compareBanzGame1(numNodes, adj):
+def compareBanzGame1(numNodes, adj, maxIterations):
     start_time = time.time()
     banzExactGame1 = computeBanzExactGame1(numNodes, adj) 
     print "banzExactGame1 is ", banzExactGame1 
     start_banzMCGame1 = time.time() 
     print "computation time for banzExactGame1 is ", start_banzMCGame1 - start_time 
-    banzMCGame1, banzMCForIter, timeMCForIter =  computeMCGame1(numNodes, adj, 12000, 'banz')
+    banzMCGame1, banzMCForIter, timeMCForIter =  computeMCGame1(numNodes, adj, maxIterations, 'banz')
     print "banzMCGame1 is ", banzMCGame1
     print "computation time for banzMCGame1 is", time.time() - start_banzMCGame1
     marginalError = []
     for iter in range(len(banzMCForIter)):
         marginalError.append(max(np.absolute(np.array(banzMCGame1) -np.array(banzMCForIter[iter]))/ (np.array(banzMCGame1) + np.array([0.00001]))))
-    filename = 'compareBanzGame1_marginalErr'    
-    f = open(filename, 'a')
-    print >> f, marginalError
-    f.close
     print marginalError     
-    
+    print timeMCForIter
+    return marginalError, timeMCForIter  
 
 
-def compareBanzGame2(numNodes,adj,numThreshold):
+
+def compareShapGame1(numNodes, adj, maxIterations):
+    start_time = time.time()
+    shapExactGame1 = computeShapExactGame1(numNodes, adj) 
+    print "shapExactGame1 is ", shapExactGame1 
+    start_shapMCGame1 = time.time() 
+    print "computation time for shapExactGame1 is ", start_shapMCGame1 - start_time 
+    shapMCGame1, shapMCForIter, timeMCForIter =  computeMCGame1(numNodes, adj, maxIterations, 'shap')
+    print "shapMCGame1 is ", shapMCGame1
+    print "computation time for shapMCGame1 is", time.time() - start_shapMCGame1
+    marginalError = []
+    for iter in range(len(shapMCForIter)):
+        marginalError.append(max(np.absolute(np.array(shapMCGame1) -np.array(shapMCForIter[iter]))/ (np.array(shapMCGame1) + np.array([0.00001]))))
+    print marginalError     
+    print timeMCForIter
+    return marginalError, timeMCForIter  
+
+
+
+def compareBanzGame2(numNodes,adj,numThreshold, maxIterations):
     start_time = time.time()
     banzExactGame2 = computeBanzExactGame2(numNodes, adj, numThreshold) 
     print "banzExactGame2 is ", banzExactGame2 
     start_banzMCGame2 = time.time()
     print "computation time for banzExactGame2 is ", start_banzMCGame2 - start_time 
-    banzMCGame2, banzMCForIter, timeMCForIter =  computeMCGame2(numNodes, adj, 120000, numThreshold, 'banz')
+    banzMCGame2, banzMCForIter, timeMCForIter =  computeMCGame2(numNodes, adj, maxIterations, numThreshold, 'banz')
     print "banzMCGame2 is", banzMCGame2
     print "computation time for banzMCGame2 is", time.time() - start_banzMCGame2
     marginalError = []
     for iter in range(len(banzMCForIter)):
         marginalError.append(max(np.absolute(np.array(banzMCGame2) - np.array(banzMCForIter[iter]))/ (np.array(banzMCGame2) + np.array([0.00001]))))
-    print marginalError     
-    filename = 'compareBanzGame2_marginalErr'
-    f = open(filename, 'a')
-    print >> f, marginalError
-    f.close
+    return marginalError, timeMCForIter  
 
 
-
-def compareBanzGame3(numNodes, adj, D):
+def compareBanzGame3(numNodes, adj, D, maxIterations):
     start_time = time.time()
     banzExactGame3 = computeBanzExactGame3(numNodes, adj, D) 
     print "banzExactGame3 is ", banzExactGame3 
     start_banzMCGame3 = time.time()
     print "computation time for banzExactGame3 is ", start_banzMCGame3 - start_time 
-    banzMCGame3, banzMCForIter, timeMCForIter =  computeMCGame3(numNodes, adj, 120000, D, 'banz')
+    banzMCGame3, banzMCForIter, timeMCForIter =  computeMCGame3(numNodes, adj, maxIterations, D, 'banz')
     print "banzMCGame3 is", banzMCGame3
     print "computation time for banzMCGame3 is", time.time() - start_banzMCGame3
     marginalError = []
     for iter in range(len(banzMCForIter)):
         marginalError.append(max(np.absolute(np.array(banzMCGame3) -np.array(banzMCForIter[iter]))/ (np.array(banzMCGame3) + np.array([0.00001]))))
     print marginalError     
-    filename = 'compareBanzGame3_marginalErr'
-    f = open(filename, 'a')
-    print >> f, marginalError
-    f.close
+    return marginalError, timeMCForIter  
 
 
-def compareBanzGame4(numNodes, adj, f, distances, D):
+def compareBanzGame4(numNodes, adj, payoffFunction, distances, D, maxIterations):
     start_time = time.time()
-    print "D" ,D
-    print "distances", distances
-    banzExactGame4 = computeBanzExactGame4(numNodes, adj,f ,distances, D) 
-    print "banzExactGame4 is ", banzExactGame4 
+    filename = 'compareBanzGame4_Err'+str(numNodes)+str(maxIterations)+str(payoffFunction)    
+    f = open(filename, 'a')
+    banzExactGame4 = computeBanzExactGame4(numNodes, adj, payoffFunction ,distances, D) 
+    print >> f, "banzExactGame4 is,"
+    print >> f,  banzExactGame4 
     start_banzMCGame4 = time.time()
-    print "computation time for banzExactGame4 is ", start_banzMCGame4 - start_time 
-    banzMCGame4, banzMCForIter, timeMCForIter =  computeMCGame4(numNodes, adj, 12, D, 'banz')
-    print "banzMCGame4 is", banzMCGame4
-    print "computation time for banzMCGame4 is", time.time() - start_banzMCGame4
+    print >> f, "computation time of banzExactGame4 is,"
+    print >> f,  start_banzMCGame4 - start_time 
+    banzMCGame4, banzMCForIter, timeMCForIter =  computeMCGame4(numNodes, adj, maxIterations, payoffFunction, distances, 'D',  'banz')
+    print >> f, "banzMCGame4 is"
+    print >> f,  banzMCGame4
+    print >> f,  time.time() - start_banzMCGame4
+    f.close
     marginalError = []
     for iter in range(len(banzMCForIter)):
         marginalError.append(max(np.absolute(np.array(banzMCGame4) -np.array(banzMCForIter[iter]))/ (np.array(banzMCGame4) + np.array([0.00001]))))
     print marginalError     
-    filename = 'compareBanzGame4_marginalErr'
+    filename = 'compareBanzGame4_marginalErr'+ str(numNodes)+str(payoffFunction)
     f = open(filename, 'a')
     print >> f, marginalError
+    print >> f, timeMCForIter 
     f.close
 
 
-def compareShapAndBanz(numNodes, adj, maxIterations, Wcutoff, numSteps, selectedNodes):
+def compareShapAndBanz(numNodes, adj, maxIterations, Wcutoff, numSteps, selectedNodes, cutoffFraction):
     start_time = time.time()
     shapMCGame5, shapMCForIter, timeMCForIter = computeMCGame5(numNodes, adj, maxIterations, Wcutoff, 'shap')
-    filename = 'compareShapAndBanz_mErr'    
+    filename = 'compareShapAndBanz_Err'+str(numNodes)+str(cutoffFraction)    
     f = open(filename, 'a')
     marginalError = []
     for iter in range(len(shapMCForIter)):
         marginalError.append(max(np.absolute(np.array(shapMCGame5) -np.array(shapMCForIter[iter]))/ (np.array(shapMCGame5) + np.array([0.00001]))))
     print marginalError     
-    print >> f, marginalError, timeMCForIter
+    print >> f, marginalError
+    print >> f, timeMCForIter
     print shapMCGame5
-    print time.time() - start_time
+    print shapMCGame5
+    print "time for ShapMCgame5 is", time.time() - start_time
+    start_time = time.time()
     banzMCGame5, banzMCForIter, timeMCForIter =  computeMCGame5(numNodes, adj, maxIterations,  Wcutoff , 'banz')
     print banzMCGame5
+    print "time for BanzMCgame5 is", time.time() - start_time
     marginalError = []
     for iter in range(len(banzMCForIter)):
         marginalError.append(max(np.absolute(np.array(banzMCGame5) -np.array(banzMCForIter[iter]))/ (np.array(banzMCGame5) + np.array([0.00001]))))
     print marginalError     
      
     print >> f, marginalError
+    print >> f, timeMCForIter 
     f.close
+    filename = 'spreadShapAndBanz'+str(numNodes)+str(cutoffFraction)
+    f = open(filename,'a')
+    print >> f, shapMCGame5 
+    print >> f, banzMCGame5
+
     nodesRankedByShap = rankNodes(shapMCGame5)       
     nodesRankedByBanz = rankNodes(banzMCGame5)
+    print >> f, "nodes ranked by Shap" 
+    print >> f, nodesRankedByShap
+    print >> f, "nodes ranked by Banz"
+    print >> f, nodesRankedByBanz
     for i in range(selectedNodes):     
         
-        print computeSpread(numNodes, adj, nodesRankedByShap[0:5*i],  Wcutoff, numSteps)
+        print >> f, computeSpread(numNodes, adj, nodesRankedByShap[0:i],  Wcutoff, numSteps)
 
-        print computeSpread(numNodes, adj, nodesRankedByBanz[0:5*i], Wcutoff, numSteps)
+        print >> f, computeSpread(numNodes, adj, nodesRankedByBanz[0:i], Wcutoff, numSteps)
     print time.time() - start_time
-
+    f.close()
 
 def execute(handler, Graph):
-    numNodes, numEdges,  adj =  readGraph(Graph, True)
+    if Graph in ['AdobeCaptivate_1kFollowersGraph.list', 'DirectedEdgeWeighted4000node']:
+        numNodes, numEdges,  adj =  readDirectedGraph(Graph, True)
+    else:
+        numNodes, numEdges,  adj =  readUndirectedGraph(Graph, True)
     if handler is 1:
-        compareBanzGame1(numNodes, adj)
+        maxIterations = 5000 
+        numRuns = 20
+        avgMarginalError = np.zeros(maxIterations/5)
+        maxMarginalError = np.zeros(maxIterations/5)
+        minMarginalError = np.zeros(maxIterations/5) 
+        minMarginalError.fill(100)
+        for i in range(numRuns): 
+            marginalError, timeForSteps = compareBanzGame1(numNodes, adj, maxIterations)
+            avgMarginalError += np.array(marginalError)
+            maxMarginalError = np.maximum(maxMarginalError, marginalError)
+            minMarginalError = np.minimum(minMarginalError, marginalError)  
+        print avgMarginalError/numRuns , maxMarginalError, minMarginalError, timeForSteps
+        filename = 'compareBanzGame1_marginalErr'+str(numNodes)    
+        f = open(filename, 'a')
+        print >> f, " ".join([str(x) for x in avgMarginalError/numRuns] )
+        print >> f, " ".join([str(x) for x in maxMarginalError] )
+        print >> f, " ".join([str(x) for x in minMarginalError] )
+        print >> f, " ".join([str(x) for x in timeForSteps] )
+        f.close
+    
     if handler is 2:    
-        compareBanzGame2(numNodes, adj, getThreshold(numNodes, adj, 2, 0))
+        intercepts = [2, 0, 0]
+        weights = [0, 0.5, 0.75]
+        for type in range(len(intercepts)):
+          maxIterations = 5000 
+          numRuns =20
+          avgMarginalError = np.zeros(maxIterations/5)
+          maxMarginalError = np.zeros(maxIterations/5)
+          minMarginalError = np.zeros(maxIterations/5) 
+          minMarginalError.fill(100)
+          for i in range(numRuns): 
+              print i
+              marginalError, timeForSteps = compareBanzGame2(numNodes, adj, getThreshold(numNodes, adj, intercepts[type], weights[type]), maxIterations)
+              avgMarginalError += np.array(marginalError)
+              maxMarginalError = np.maximum(maxMarginalError, marginalError)
+              minMarginalError = np.minimum(minMarginalError, marginalError)  
+          print avgMarginalError/numRuns , maxMarginalError, minMarginalError, timeForSteps
+          filename = 'compareBanzGame2_marginalErr'+ str(numNodes)+str(type)    
+          f = open(filename, 'a')
+          print >> f, " ".join([str(x) for x in avgMarginalError/numRuns] )
+          print >> f, " ".join([str(x) for x in maxMarginalError] )
+          print >> f, " ".join([str(x) for x in minMarginalError] )
+          print >> f, " ".join([str(x) for x in timeForSteps] )
+          f.close
 
-        compareBanzGame2(numNodes, adj, getThreshold(numNodes, adj, 0, 0.5))
-        compareBanzGame2(numNodes, adj, getThreshold(numNodes, adj, 0, 0.75))
+
     if handler is 3:
-        distances, D = getDcutoff(numNodes, adj, 'inf')
-        avgDis = computeAvgDist(numNodes, distances)
-        print avgDis
+        avgdist = 6.91
+        weights = avgdist*np.array([0.125, 0.25])
+        for type in range(len(weights)):
+          maxIterations = 5000 
+          numRuns = 3
+          avgMarginalError = np.zeros(maxIterations/5)
+          maxMarginalError = np.zeros(maxIterations/5)
+          minMarginalError = np.zeros(maxIterations/5) 
+          minMarginalError.fill(100)
+          distances,D = getDcutoff(numNodes, adj, weights[type])
+          for i in range(numRuns): 
+              marginalError, timeForSteps = compareBanzGame3(numNodes, adj, D, maxIterations)
+              avgMarginalError += np.array(marginalError)
+              maxMarginalError = np.maximum(maxMarginalError, marginalError)
+              minMarginalError = np.minimum(minMarginalError, marginalError)  
+          print avgMarginalError/numRuns , maxMarginalError, minMarginalError, timeForSteps
+          filename = 'compareBanzGame3_marginalErr'+ str(numNodes)+str(type)    
+          f = open(filename, 'a')
+          print >> f, " ".join([str(x) for x in avgMarginalError/numRuns] )
+          print >> f, " ".join([str(x) for x in maxMarginalError] )
+          print >> f, " ".join([str(x) for x in minMarginalError] )
+          print >> f, " ".join([str(x) for x in timeForSteps] )
+          f.close
 
-        distances,D = getDcutoff(numNodes, adj, 3)
-        print distances, D
-        compareBanzGame3(numNodes, adj, D)
-#        distances,D = getDcutoff(numNodes, adj, avgDis*0.25)
-#        compareBanzGame3(numNodes, adj, D)
-#        distances,D = getDcutoff(numNodes, adj, avgDis/8)
-#        compareBanzGame3(numNodes, adj, D)
     if handler is 4:
-        distances, D = getDcutoff(numNodes, adj, 1)
-                
-        compareBanzGame4(numNodes, adj, f1, distances, D)
+        start_time = time.time()
+        distances, D = getDcutoff(numNodes, adj, 'inf')
+        print "time taken for distances, D is",time.time() - start_time  
+        start_time = time.time()
+        maxIterations = 30000         
+        for f in [f1, f2]:
+            compareBanzGame4(numNodes, adj,  f, distances, D, maxIterations)
+            print "function is completed in time ", time.time() - start_time
+      #      filename = 'compareBanzGame4_marginalErr'+ str(numNodes)+str(type)    
+       #     f = open(filename, 'a')
+        #    banzMCGame4, banzMCForIter, timeMCForIter =  computeMCGame4(numNodes, adj, maxIterations, f1, distances, D, 'banz' )
+#            print  banzMCGame4, banzMCForIter, timeMCForIter
 
     if handler is 5:
-        compareShapAndBanz(numNodes, adj, 300, getWcutoff(numNodes, adj, 0, 0).tolist(), 1000, 500)
+        maxIterations = 100000
+        Wcutoff =[0.1,  0.25, 0.5]
+        for w in Wcutoff:
+            numTimeSteps = 100
+            selectedNodes = int (0.05*numNodes)
+            compareShapAndBanz(numNodes, adj, maxIterations, getWcutoff(numNodes, adj, 0, w).tolist(), numTimeSteps, selectedNodes,w)
+            
     if handler is 6:
 #        print "executing 5"
          print getDcutoff(numNodes, adj, 2)
     if handler is 7:
-        dist,D = dijkstraDistances(numNodes, adj, 1)
-        print dist
-        print D
+        start_time = time.time()
+        dist,D = dijkstraDistances(numNodes, adj, 100000)
+        for i in range(numNodes):
+            for j in range(numNodes):
+                print dist[i][j],
+            print    
+        for i in range(numNodes):
+            for j in D[i]:
+                print D[i][j],
+            print          
+        print time.time() - start.time()
+    if handler is 9:
+            maxIterations = 1200 
+            numRuns = 2
+            avgMarginalError = np.zeros(maxIterations/5)
+            maxMarginalError = np.zeros(maxIterations/5)
+            minMarginalError = np.zeros(maxIterations/5) 
+            minMarginalError.fill(100)
+            for i in range(numRuns): 
+                marginalError, timeForSteps = compareShapGame1(numNodes, adj, maxIterations)
+                avgMarginalError += np.array(marginalError)
+                maxMarginalError = np.maximum(maxMarginalError, marginalError)
+                minMarginalError = np.minimum(minMarginalError, marginalError)  
+            print avgMarginalError/numRuns , maxMarginalError, minMarginalError, timeForSteps   
+        
+            filename = 'compareShapGame1_marginalErr'    
+            f = open(filename, 'a')
+            print >> f, " ".join([str(x) for x in avgMarginalError/numRuns] )
+            print >> f, " ".join([str(x) for x in maxMarginalError] )
+            print >> f, " ".join([str(x) for x in minMarginalError] )
+            print >> f, " ".join([str(x) for x in timeForSteps] )
+            f.close
+    if handler is 10:
+        d_cutoff = 0.4
+        distances, D = getDcutoff(numNodes, adj, d_cutoff)
+#        print f1(2)
+        maxIterations = 2 
+        banzMCGame4, banzMCForIter, timeMCForIter =  computeMCGame4(numNodes, adj, maxIterations, f1, distances, D, 'banz' )
+        
+        filename = 'compareBanzGame4_MC_marginalErr'+ str(numNodes)+str('f1')+str(maxIterations)+str(d_cutoff)    
+        f = open(filename, 'a')
+        print >> f, banzMCGame4
+        print >> f, banzMCForIter
+        print >> f, timeMCForIter
+        f.close
+    if handler is 11:
+        d_cutoff = 0.8
+        distances, D = getDcutoff(numNodes, adj, d_cutoff)
+#        print f1(2)
+        maxIterations = 2 
+        banzMCGame4, banzMCForIter, timeMCForIter =  computeMCGame4(numNodes, adj, maxIterations, f1, distances, D, 'banz' )
+        
+        filename = 'compareBanzGame4_MC_marginalErr'+ str(numNodes)+str('f1')+str(maxIterations)+str(d_cutoff)    
+        f = open(filename, 'a')
+        print >> f, banzMCGame4
+        print >> f, banzMCForIter
+        print >> f, timeMCForIter
+        f.close
+    if handler is 12:
+#        input_file = 'power_res_seeds'
+        files =['spreadShap49410.1','spreadBanz49410.1']
+        for input_file in files:
+            with open(input_file, 'r') as file:
+                seeds = file.read()
+                print seeds
+                seeds = [int (i) for i in seeds.split(',')]    
+                Wcutoff = 0.1
+                numSteps = 100
+                filename = "computeSpread"+str(input_file)+str(numNodes)+str(Wcutoff)
+                f = open(filename, 'a')
+                for i in range(len(seeds)):
+                    print >> f, computeSpread(numNodes, adj, seeds[0:i], getWcutoff(numNodes, adj, 0, Wcutoff), numSteps)
+                f.close
+    if handler is 13:
+        filename = 'DirectedEdgeWeightedGraph'
+        f = open(filename,'a')
+        for v in adj:
+            for u in adj[v]:
+                print v, u, 1.0/float(len(adj[v]))
+        f.close        
 
 if __name__ =="__main__":
+    np.set_printoptions(threshold=np.nan) 
     G1 = 'power.txt'
     G2 = 'astro-ph.txt'
     G3 = '4node.txt'
     G4 = '8node.txt'
-    execute(3, G1)
-#    execute(3, G4)
+    G5 = 'AdobeCaptivate_1kFollowersGraph.list' 
+    G6 = 'hep_data8k'
+    G7 = 'DirectedEdgeWeighted4000node'
+    G8 = 'hep.txt1'
+    execute(5, G8)
+    
+#    execute(9, G4)
 
 ##   print numNodes, numEdges, adj
-#    shapExactGame1 = computeShapExactGame1(numNodes, adj) 
+
 #    print "shapExactGame1 is ", shapExactGame1 
 #    start_banzExactGame1 = time.time() 
 #    banzExactGame1 = computeBanzExactGame1(numNodes, adj)

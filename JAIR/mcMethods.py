@@ -163,19 +163,22 @@ def game3MCBanzstepAdapter(numNodes, adj, copyOfNodes, numThresholdEdges, Wcutof
 
 
 
-def game4MCBanzstep(numNodes, adj, coalition, payOff_function, distances, D, banzMC):
-
+def game4MCBanzstep(numNodes, adj, coalition, payOff_function, distances, banzMC):
+    print payOff_function(1) 
     Nodes = [i for i in range(numNodes)]
     nonCoalition = set(Nodes) - set(coalition)
     for vert in nonCoalition: 
         for j in nonCoalition:
-            max = 10000000
+            min = 'inf'
             for k in coalition:
-                if distance[k][j] < max:
-                    max = distance[vert][j]
-            if distance[vert][j] < max:
-                banzMC[vert] += ( payOff_function(distances[vert][j] ) - payOff_function(max))
-    print "returiing" 
+                if distances[k][j] < min :
+                     min = distances[k][j]
+               #     print min
+            if distances[vert][j] < min:
+               print ( payOff_function(distances[vert][j] ) - payOff_function(min))
+               banzMC[vert] += ( payOff_function(distances[vert][j] ) - payOff_function(min))
+               print min, banzMC[vert] 
+    print "returning" 
     return banzMC
 
 
@@ -271,6 +274,7 @@ def game5MCBanzstepAdapter(numNodes, adj, copyOfNodes, numThresholdEdges, Wcutof
 
 def computeShapMC(numNodes, adj, maxIteration, stepfunc, numThresholdEdges, Wcutoff, influence_dist,  payOff_function, distances):
 
+    timeMCForIter = [0]*(maxIteration/5)
     start_time = time.time()
     shapMC = [0]* numNodes    
     myIter = 1
@@ -284,7 +288,7 @@ def computeShapMC(numNodes, adj, maxIteration, stepfunc, numThresholdEdges, Wcut
 
         if myIter % 5 is 0:
                 shapMCForIter[myIter/5 - 1] = np.array(shapMC) / float(myIter)
-                timeMCForIter[myIter/5 - 1] = np.array(time.time() - start_time) / float(myIter)
+                timeMCForIter[myIter/5 - 1] = (time.time() - start_time) / float(myIter)
               
     for i in range(numNodes):    
         shapMC[i] = shapMC[i] / float(maxIteration)
@@ -297,7 +301,7 @@ def computeBanzMC(numNodes, adj, maxIteration, stepfunc,  numThresholdEdges, Wcu
     banzMC = [0]* numNodes    
     myIter = 1
     banzMCForIter = np.zeros( shape=(maxIteration/5, numNodes))
-    timeMCForIter = np.zeros( shape=(maxIteration/5, numNodes))
+    timeMCForIter = [0]*(maxIteration/5)
     while myIter <= maxIteration:
         copyOfNodes = range(numNodes)
         coalition = []
@@ -308,7 +312,7 @@ def computeBanzMC(numNodes, adj, maxIteration, stepfunc,  numThresholdEdges, Wcu
         myIter = myIter + 1
         if myIter % 5 is 0:
                 banzMCForIter[myIter/5 - 1] = np.array(banzMC) * 2 / float(myIter)
-                timeMCForIter[myIter/5 - 1] = np.array(time.time() - start_time) / float(myIter)
+                timeMCForIter[myIter/5 - 1] = (time.time() - start_time) 
               
     for i in range(numNodes):    
         banzMC[i] = banzMC[i] * 2 / float(maxIteration)
@@ -361,7 +365,7 @@ def computeMCGame3(numNodes, adj, maxIteration, Dcutoff, powerIndex ):
 
 
 
-def computeMCGame4(numNodes, adj, maxIteration, f, powerIndex ):
+def computeMCGame4(numNodes, adj, maxIteration, f, distances, D, powerIndex ):
     if (powerIndex == 'shap'):
         return(computeShapMC(numNodes, adj, maxIteration, game4MCShapstepAdapter,  0,  0, 0, f, distances))
     if (powerIndex == 'banz'):

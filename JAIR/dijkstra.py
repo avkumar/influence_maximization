@@ -1,25 +1,41 @@
-from heapq import heappush, heappop
 import numpy as np
 
-def dijkstra(numNodes, adj, source, distances, maxDistance):
-#    print adj
+
+
+def dijkstra(numNodes, adj, source, distances, maxDistance, D):
+
+
+    def greater(a, b):
+        if distances[source][a] < distances[source][b]:
+            return -1 
+        if distances[source][a] > distances[source][b]:
+            return 1
+        return a < b
     distances [source][source] = 0.0
-#    maxDistance = 1
-    heap = []
-    visited = [False]*numNodes
-    heappush(heap, source)
+    heap = [i for i in range(numNodes)]
+    heap = sorted(heap, cmp=greater)
     while len(heap) :
         u = heap[0]
         heap.remove(u)
+        if maxDistance !=-1 and distances[source][u]  > maxDistance :
+            break
         if distances[source][u] != 'inf':    
             if adj.__contains__(u):
                 for v in adj[u]:
-                    if not visited[v]:
                         if  (distances[source][u] + adj[u][v] < distances[source][v]):
+                            heap.remove(v)
                             distances[source][v] = distances[source][u] + adj[u][v]
-                            heappush(heap, v)
-        visited[u] = True
-    return distances 
+                            heap.append(v)
+                            heap = sorted(heap, cmp=greater)
+
+        D[source].append(u)
+    print 
+    for i in range(numNodes):
+        print distances[source][i],
+    print
+    for i in D[source]:
+        print i,
+    return  
 
 
 
@@ -27,12 +43,11 @@ def dijkstra(numNodes, adj, source, distances, maxDistance):
 
 def dijkstraDistances(numNodes, adj, maxDistance):
     print "maxdistance is ", maxDistance
-    distances = np.full((numNodes, numNodes),'inf')
+    distances = np.empty((numNodes, numNodes,))
+    distances[:] = 'inf'
     D = {}
     for vert in range(numNodes):
         D[vert] = []
-        distances = dijkstra(numNodes, adj, vert, distances, maxDistance)
-        for i in range(numNodes):
-            if distances[vert][i] <= maxDistance:
-                D[vert].append(i)
-    return distances, D
+        dijkstra(numNodes, adj, vert, distances, maxDistance, D)
+#       print distances
+    return 

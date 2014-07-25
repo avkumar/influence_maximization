@@ -3,8 +3,6 @@ import numpy as np
 
 
 def dijkstra(numNodes, adj, source, distances, maxDistance, D):
-
-
     def greater(a, b):
         if distances[source][a] < distances[source][b]:
             return -1 
@@ -37,7 +35,8 @@ def dijkstra(numNodes, adj, source, distances, maxDistance, D):
 
 def dijkstraDistances(numNodes, adj, maxDistance):
     print "maxdistance is ", maxDistance
-    distances = np.full((numNodes, numNodes),'inf')
+    distances = np.empty((numNodes, numNodes,))
+    distances[:] = 'inf'
     D = {}
     for vert in range(numNodes):
         D[vert] = []

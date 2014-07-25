@@ -2,17 +2,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-ExactrunTime = 0.0119438171387
-MCrunTime=115 
+#ExactrunTime = 0.0119438171387
+#MCrunTime=115 
 # runtime is 12 milli seconds or 11900 microseconds divided among length of y i.e. 2400. so unit is 50 microseconds:: i.e. 
-with open('compareBanzGame1_marginalErr') as f:
+with open('spreadShapAndBanz11120.1') as f:
     read_data = f.read()
-    split = int (len(read_data)*0.1)
-    read_data = read_data.split(',')[ :split]
+#    split = int (len(read_data)*0.1)
+#    read_data = read_data.split(',')[ :split]
+    read_data = read_data.split(',')
     read_data = [read_data[i].strip(']') for i in range(len(read_data))] 
 
-    read_data = [read_data[i].strip('[') for i in range(len(read_data) -2)] 
-    x = np.array([float (read_data[i]) for i in range(len(read_data) - 2)])
+    read_data = [read_data[i].strip('[') for i in range(len(read_data))] 
+    x = np.array([float (read_data[i]) for i in range(len(read_data))])
     y = np.array([0.05 * i for i in range(len(x))])
     y1 = [ExactrunTime for i in range(len(x))] 
 
