@@ -1,0 +1,4 @@
+This folder contains src, data and results subfolders
+src contains relevant methods that computes both exact and Monte Carlo simulations for all the 5 games along with Brute force implementations of both Shapley value and Banzhaf value
+data contains all the input Graphs that have been used for analysis
+results folder contains the output of the above code
